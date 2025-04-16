@@ -6,18 +6,21 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/STARRY-S/learn-mcp/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
 )
 
 var (
-	sse  bool
-	bind string
-	port int
+	version bool
+	sse     bool
+	bind    string
+	port    int
 )
 
 func init() {
+	flag.BoolVar(&version, "version", false, "Show version")
 	flag.BoolVar(&sse, "sse", false, "Use SSE for streaming output")
 	flag.StringVar(&bind, "bind", "0.0.0.0", "Bind address")
 	flag.IntVar(&port, "port", 8188, "Bind port")
@@ -25,10 +28,15 @@ func init() {
 }
 
 func main() {
+	if version {
+		fmt.Printf("%v - %v\n", utils.Version, utils.Commit)
+		return
+	}
+
 	// Create MCP server
 	s := server.NewMCPServer(
 		"Calculator",
-		"1.0.0",
+		utils.Version,
 		server.WithResourceCapabilities(true, true),
 		server.WithLogging(),
 		server.WithRecovery(),
