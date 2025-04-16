@@ -8,7 +8,7 @@ set -euo pipefail
 cmds=(
     "calculator"
     "ipaddr"
-    "kubecheck"
+    "kubehelper"
     "weather"
 )
 

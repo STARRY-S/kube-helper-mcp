@@ -14,6 +14,11 @@ type Helper struct {
 	wctx *wrangler.Context
 }
 
+type listResult struct {
+	Name   string
+	Status string
+}
+
 func NewHelper(c *rest.Config) *Helper {
 	wctx := wrangler.NewContextOrDie(c)
 	return &Helper{
@@ -22,19 +27,67 @@ func NewHelper(c *rest.Config) *Helper {
 }
 
 func (h *Helper) listDeployment(ns string, opts v1.ListOptions) (any, error) {
-	return h.wctx.Apps.Deployment().List(ns, opts)
+	list, err := h.wctx.Apps.Deployment().List(ns, opts)
+	if err != nil {
+		return nil, err
+	}
+	var result []listResult
+	for _, item := range list.Items {
+		r := listResult{
+			Name:   item.Name,
+			Status: item.Status.String(),
+		}
+		result = append(result, r)
+	}
+	return result, err
 }
 
 func (h *Helper) listDaemonSet(ns string, opts v1.ListOptions) (any, error) {
-	return h.wctx.Apps.DaemonSet().List(ns, opts)
+	list, err := h.wctx.Apps.DaemonSet().List(ns, opts)
+	if err != nil {
+		return nil, err
+	}
+	var result []listResult
+	for _, item := range list.Items {
+		r := listResult{
+			Name:   item.Name,
+			Status: item.Status.String(),
+		}
+		result = append(result, r)
+	}
+	return result, err
 }
 
 func (h *Helper) listStatefulSet(ns string, opts v1.ListOptions) (any, error) {
-	return h.wctx.Apps.StatefulSet().List(ns, opts)
+	list, err := h.wctx.Apps.StatefulSet().List(ns, opts)
+	if err != nil {
+		return nil, err
+	}
+	var result []listResult
+	for _, item := range list.Items {
+		r := listResult{
+			Name:   item.Name,
+			Status: item.Status.String(),
+		}
+		result = append(result, r)
+	}
+	return result, err
 }
 
 func (h *Helper) listPod(ns string, opts v1.ListOptions) (any, error) {
-	return h.wctx.Core.Pod().List(ns, opts)
+	list, err := h.wctx.Core.Pod().List(ns, opts)
+	if err != nil {
+		return nil, err
+	}
+	var result []listResult
+	for _, item := range list.Items {
+		r := listResult{
+			Name:   item.Name,
+			Status: item.Status.String(),
+		}
+		result = append(result, r)
+	}
+	return result, err
 }
 
 func (h *Helper) ListWorkload(

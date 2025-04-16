@@ -2,6 +2,6 @@
 
 set -euo pipefail
 
-cd $(diename $0)/..
+cd $(dirname $0)/..
 
 rm -rf bin &> /dev/null

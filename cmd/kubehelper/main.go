@@ -47,7 +47,7 @@ func main() {
 
 	// Create MCP server
 	s := server.NewMCPServer(
-		"KubeCheck",
+		"kube_helper",
 		utils.Version,
 		server.WithResourceCapabilities(true, true),
 		server.WithLogging(),
@@ -56,8 +56,8 @@ func main() {
 
 	// Add a calculator tool
 	kubeCheckTool := mcp.NewTool(
-		"kubecheck",
-		mcp.WithDescription("Check my kubernetes cluster workloads"),
+		"list_workload",
+		mcp.WithDescription("List kubernetes cluster workloads with detailed informations"),
 		mcp.WithString(
 			"workload",
 			mcp.Required(),
