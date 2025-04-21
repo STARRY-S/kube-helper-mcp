@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/sirupsen/logrus"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type Workload struct {
@@ -23,10 +23,10 @@ type Status struct {
 }
 
 type Condition struct {
-	Type    string             `json:"type"`
-	Status  v1.ConditionStatus `json:"status"`
-	Reason  string             `json:"reason,omitempty"`
-	Message string             `json:"message,omitempty"`
+	Type    string                 `json:"type"`
+	Status  metav1.ConditionStatus `json:"status"`
+	Reason  string                 `json:"reason,omitempty"`
+	Message string                 `json:"message,omitempty"`
 }
 
 func NewWorkload(a any) *Workload {

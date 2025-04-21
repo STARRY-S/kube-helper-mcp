@@ -6,9 +6,9 @@ import (
 )
 
 type listResult struct {
-	results []*types.Workload `json:"results,omitempty"`
+	Results []*types.Workload `json:"results,omitempty"`
 }
 
 func (r *listResult) String() string {
-	return utils.Print(r.results)
+	return utils.Print(r.Results)
 }

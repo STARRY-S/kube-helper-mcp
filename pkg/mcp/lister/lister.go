@@ -11,7 +11,7 @@ import (
 	"github.com/STARRY-S/kube-helper-mcp/pkg/wrangler"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 )
 
@@ -27,50 +27,50 @@ func NewLister(c *rest.Config) *Lister {
 	}
 }
 
-func (h *Lister) listDeployment(ns string, opts v1.ListOptions) (*listResult, error) {
+func (h *Lister) listDeployment(ns string, opts metav1.ListOptions) (*listResult, error) {
 	list, err := h.wctx.Apps.Deployment().List(ns, opts)
 	if err != nil {
 		return nil, err
 	}
 	result := &listResult{}
 	for _, item := range list.Items {
-		result.results = append(result.results, types.NewWorkload(item))
+		result.Results = append(result.Results, types.NewWorkload(item))
 	}
 	return result, err
 }
 
-func (h *Lister) listDaemonSet(ns string, opts v1.ListOptions) (*listResult, error) {
+func (h *Lister) listDaemonSet(ns string, opts metav1.ListOptions) (*listResult, error) {
 	list, err := h.wctx.Apps.DaemonSet().List(ns, opts)
 	if err != nil {
 		return nil, err
 	}
 	result := &listResult{}
 	for _, item := range list.Items {
-		result.results = append(result.results, types.NewWorkload(item))
+		result.Results = append(result.Results, types.NewWorkload(item))
 	}
 	return result, err
 }
 
-func (h *Lister) listStatefulSet(ns string, opts v1.ListOptions) (*listResult, error) {
+func (h *Lister) listStatefulSet(ns string, opts metav1.ListOptions) (*listResult, error) {
 	list, err := h.wctx.Apps.StatefulSet().List(ns, opts)
 	if err != nil {
 		return nil, err
 	}
 	result := &listResult{}
 	for _, item := range list.Items {
-		result.results = append(result.results, types.NewWorkload(item))
+		result.Results = append(result.Results, types.NewWorkload(item))
 	}
 	return result, err
 }
 
-func (h *Lister) listPod(ns string, opts v1.ListOptions) (*listResult, error) {
+func (h *Lister) listPod(ns string, opts metav1.ListOptions) (*listResult, error) {
 	list, err := h.wctx.Core.Pod().List(ns, opts)
 	if err != nil {
 		return nil, err
 	}
 	result := &listResult{}
 	for _, item := range list.Items {
-		result.results = append(result.results, types.NewWorkload(item))
+		result.Results = append(result.Results, types.NewWorkload(item))
 	}
 	return result, err
 }
@@ -81,14 +81,14 @@ func (h *Lister) ListWorkload(
 	labels []string,
 	limit int64,
 ) (string, error) {
-	opts := v1.ListOptions{
+	opts := metav1.ListOptions{
 		Limit: limit,
 	}
 	if len(labels) > 0 {
 		opts.LabelSelector = strings.Join(labels, ",")
 	}
 
-	var listFunc func(string, v1.ListOptions) (*listResult, error)
+	var listFunc func(string, metav1.ListOptions) (*listResult, error)
 	switch workload {
 	case "deployment":
 		listFunc = h.listDeployment
@@ -152,8 +152,10 @@ func (h *Lister) Server() *server.MCPServer {
 }
 
 func (h *Lister) kubeCheckHandler(
-	ctx context.Context, request mcp.CallToolRequest,
+	ctx context.Context,
+	request mcp.CallToolRequest,
 ) (*mcp.CallToolResult, error) {
+	_ = ctx
 	workload, ok := request.Params.Arguments["workload"].(string)
 	if !ok {
 		return nil, errors.New("workload not provided")
