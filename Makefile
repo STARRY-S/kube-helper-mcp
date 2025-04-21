@@ -18,7 +18,7 @@ test:
 
 .PHONY: serve
 serve:
-	KUBE_CONFIG=$(pwd)/.kube/config uvx mcpo --config ./mcpo/config.json
+	KUBE_CONFIG=${HOME}/.kube/config uvx mcpo --config ./mcpo/config.json
 
 .PHONY: clean
 clean:
