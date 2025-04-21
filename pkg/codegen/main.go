@@ -20,7 +20,7 @@ func main() {
 	os.Unsetenv("GOPATH")
 
 	controllergen.Run(args.Options{
-		OutputPackage: "github.com/STARRY-S/learn-mcp/pkg/generated",
+		OutputPackage: "github.com/STARRY-S/kube-helper-mcp/pkg/generated",
 		Boilerplate:   "pkg/codegen/boilerplate.go.txt",
 		Groups: map[string]args.Group{
 			corev1.GroupName: {

@@ -1,7 +1,33 @@
-# MCP
+# Kubernetes Resource Check MCP Server
 
-Example project for some MCP protocol stuff.
+MCP Server for checking Kubernetes Resources.
+
+## Usage
+
+> This project is currently in development status and not available to use in production.
+
+```sh
+# Prepare the python virtual environment.
+make prepare
+
+# Build executable binary.
+make build
+
+# Run MCP server.
+make serve
+# Visit http://127.0.0.1:8000/kube_list/docs.
+```
 
 ## License
 
-MIT
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

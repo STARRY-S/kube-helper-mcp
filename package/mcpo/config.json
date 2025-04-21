@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "kube_list": {
+      "command": "helper",
+      "args": [
+          "list"
+      ]
+    }
+  }
+}

@@ -19,7 +19,7 @@ limitations under the License.
 package apps
 
 import (
-	v1 "github.com/STARRY-S/learn-mcp/pkg/generated/controllers/apps/v1"
+	v1 "github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/apps/v1"
 	"github.com/rancher/lasso/pkg/controller"
 )
 

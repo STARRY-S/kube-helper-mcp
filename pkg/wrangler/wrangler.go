@@ -1,12 +1,12 @@
 package wrangler
 
 import (
-	"github.com/STARRY-S/learn-mcp/pkg/generated/controllers/apps"
-	"github.com/STARRY-S/learn-mcp/pkg/generated/controllers/batch"
-	"github.com/STARRY-S/learn-mcp/pkg/generated/controllers/core"
-	corecontroller "github.com/STARRY-S/learn-mcp/pkg/generated/controllers/core/v1"
-	"github.com/STARRY-S/learn-mcp/pkg/generated/controllers/discovery.k8s.io"
-	"github.com/STARRY-S/learn-mcp/pkg/generated/controllers/networking.k8s.io"
+	"github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/apps"
+	"github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/batch"
+	"github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/core"
+	corecontroller "github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/core/v1"
+	"github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/discovery.k8s.io"
+	"github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/networking.k8s.io"
 	"github.com/rancher/lasso/pkg/controller"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -14,10 +14,10 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/record"
 
-	appsv1 "github.com/STARRY-S/learn-mcp/pkg/generated/controllers/apps/v1"
-	batchv1 "github.com/STARRY-S/learn-mcp/pkg/generated/controllers/batch/v1"
-	discoveryv1 "github.com/STARRY-S/learn-mcp/pkg/generated/controllers/discovery.k8s.io/v1"
-	networkingv1 "github.com/STARRY-S/learn-mcp/pkg/generated/controllers/networking.k8s.io/v1"
+	appsv1 "github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/apps/v1"
+	batchv1 "github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/batch/v1"
+	discoveryv1 "github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/discovery.k8s.io/v1"
+	networkingv1 "github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/networking.k8s.io/v1"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
