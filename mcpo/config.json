@@ -1,10 +1,9 @@
 {
   "mcpServers": {
-    "kube_list": {
+    "kube_helper": {
       "command": "./dist/helper_linux_amd64_v1/helper",
       "args": [
-          "list",
-          "--debug"
+          "run"
       ]
     }
   }

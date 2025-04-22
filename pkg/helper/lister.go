@@ -1,4 +1,4 @@
-package lister
+package helper
 
 import (
 	"context"
@@ -7,27 +7,11 @@ import (
 	"strings"
 
 	"github.com/STARRY-S/kube-helper-mcp/pkg/internal/types"
-	"github.com/STARRY-S/kube-helper-mcp/pkg/utils"
-	"github.com/STARRY-S/kube-helper-mcp/pkg/wrangler"
 	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/rest"
 )
 
-// Lister is a struct that provides methods to list Kubernetes resources.
-type Lister struct {
-	wctx *wrangler.Context
-}
-
-func NewLister(c *rest.Config) *Lister {
-	wctx := wrangler.NewContextOrDie(c)
-	return &Lister{
-		wctx: wctx,
-	}
-}
-
-func (h *Lister) listDeployment(ns string, opts metav1.ListOptions) (*listResult, error) {
+func (h *KubeHelper) listDeployment(ns string, opts metav1.ListOptions) (*listResult, error) {
 	list, err := h.wctx.Apps.Deployment().List(ns, opts)
 	if err != nil {
 		return nil, err
@@ -39,7 +23,7 @@ func (h *Lister) listDeployment(ns string, opts metav1.ListOptions) (*listResult
 	return result, err
 }
 
-func (h *Lister) listDaemonSet(ns string, opts metav1.ListOptions) (*listResult, error) {
+func (h *KubeHelper) listDaemonSet(ns string, opts metav1.ListOptions) (*listResult, error) {
 	list, err := h.wctx.Apps.DaemonSet().List(ns, opts)
 	if err != nil {
 		return nil, err
@@ -51,7 +35,7 @@ func (h *Lister) listDaemonSet(ns string, opts metav1.ListOptions) (*listResult,
 	return result, err
 }
 
-func (h *Lister) listStatefulSet(ns string, opts metav1.ListOptions) (*listResult, error) {
+func (h *KubeHelper) listStatefulSet(ns string, opts metav1.ListOptions) (*listResult, error) {
 	list, err := h.wctx.Apps.StatefulSet().List(ns, opts)
 	if err != nil {
 		return nil, err
@@ -63,7 +47,31 @@ func (h *Lister) listStatefulSet(ns string, opts metav1.ListOptions) (*listResul
 	return result, err
 }
 
-func (h *Lister) listPod(ns string, opts metav1.ListOptions) (*listResult, error) {
+func (h *KubeHelper) listJob(ns string, opts metav1.ListOptions) (*listResult, error) {
+	list, err := h.wctx.Batch.Job().List(ns, opts)
+	if err != nil {
+		return nil, err
+	}
+	result := &listResult{}
+	for _, item := range list.Items {
+		result.Workloads = append(result.Workloads, types.NewWorkload(item))
+	}
+	return result, err
+}
+
+func (h *KubeHelper) listCronJob(ns string, opts metav1.ListOptions) (*listResult, error) {
+	list, err := h.wctx.Batch.CronJob().List(ns, opts)
+	if err != nil {
+		return nil, err
+	}
+	result := &listResult{}
+	for _, item := range list.Items {
+		result.Workloads = append(result.Workloads, types.NewWorkload(item))
+	}
+	return result, err
+}
+
+func (h *KubeHelper) listPod(ns string, opts metav1.ListOptions) (*listResult, error) {
 	list, err := h.wctx.Core.Pod().List(ns, opts)
 	if err != nil {
 		return nil, err
@@ -75,7 +83,7 @@ func (h *Lister) listPod(ns string, opts metav1.ListOptions) (*listResult, error
 	return result, err
 }
 
-func (h *Lister) ListWorkload(
+func (h *KubeHelper) ListWorkload(
 	workload string,
 	ns string,
 	labels []string,
@@ -89,17 +97,27 @@ func (h *Lister) ListWorkload(
 	}
 
 	var listFunc func(string, metav1.ListOptions) (*listResult, error)
-	switch workload {
+	switch strings.TrimSuffix(strings.ToLower(workload), "s") {
 	case "deployment":
 		listFunc = h.listDeployment
 	case "daemonset":
 		listFunc = h.listDaemonSet
 	case "statefulset":
 		listFunc = h.listStatefulSet
-	case "pod":
+	case "job":
+		listFunc = h.listJob
+	case "cronjob":
+		listFunc = h.listCronJob
+	case "pod", "":
 		listFunc = h.listPod
 	default:
 		return "", fmt.Errorf("unsupported workload type: %s", workload)
+	}
+
+	ns = strings.ToLower(ns)
+	switch ns {
+	case "*":
+		ns = ""
 	}
 
 	result, err := listFunc(ns, opts)
@@ -109,50 +127,25 @@ func (h *Lister) ListWorkload(
 	return result.String(), nil
 }
 
-func (h *Lister) Server() *server.MCPServer {
-	// Create MCP server
-	s := server.NewMCPServer(
-		"lister",
-		utils.Version,
-		server.WithResourceCapabilities(true, true),
-		server.WithLogging(),
-		server.WithRecovery(),
-	)
+func (h *KubeHelper) ListNamespace(
+	limit int64,
+) (string, error) {
+	opts := metav1.ListOptions{
+		Limit: limit,
+	}
 
-	// Add a calculator tool
-	kubeCheckTool := mcp.NewTool(
-		"list_workload",
-		mcp.WithDescription(`List the real-time kubernetes cluster workloads with status information,
-different workloads and namespaces will produce different results.`),
-		mcp.WithString(
-			"workload",
-			mcp.Required(),
-			mcp.Description("The kubernetes workload kind to query (pod, deployment, statefulset, daemonset)"),
-			mcp.Enum("pod", "deployment", "statefulset", "daemonset"),
-		),
-		mcp.WithString(
-			"namespace",
-			mcp.Description("The kubernetes namespace to query"),
-			mcp.DefaultString("default"),
-		),
-		// mcp.WithArray(
-		// 	"labels",
-		// 	mcp.Description("The label of the workload to query"),
-		// 	mcp.DefaultString(""),
-		// ),
-		// mcp.WithNumber(
-		// 	"limit",
-		// 	mcp.Description("The limit of the workload to query"),
-		// 	mcp.DefaultNumber(50),
-		// ),
-	)
-
-	// Add tool handler
-	s.AddTool(kubeCheckTool, h.kubeCheckHandler)
-	return s
+	list, err := h.wctx.Core.Namespace().List(opts)
+	if err != nil {
+		return "", err
+	}
+	result := []string{}
+	for _, list := range list.Items {
+		result = append(result, list.Name)
+	}
+	return strings.Join(result, ","), nil
 }
 
-func (h *Lister) kubeCheckHandler(
+func (h *KubeHelper) listWorkloadHandler(
 	ctx context.Context,
 	request mcp.CallToolRequest,
 ) (*mcp.CallToolResult, error) {
@@ -172,6 +165,19 @@ func (h *Lister) kubeCheckHandler(
 		}
 	}
 	result, err := h.ListWorkload(workload, namespace, s, int64(limit))
+	if err != nil {
+		return nil, err
+	}
+	return mcp.NewToolResultText(result), nil
+}
+
+func (h *KubeHelper) listNamespaceHandler(
+	ctx context.Context,
+	request mcp.CallToolRequest,
+) (*mcp.CallToolResult, error) {
+	_ = ctx
+	limit, _ := request.Params.Arguments["limit"].(float64)
+	result, err := h.ListNamespace(int64(limit))
 	if err != nil {
 		return nil, err
 	}

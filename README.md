@@ -14,9 +14,15 @@ make prepare
 make build
 
 # Run MCP server.
-make serve
 # Visit http://127.0.0.1:8000/kube_list/docs.
+make serve
 ```
+
+## Demo
+
+![](docs/images/demo-cline.png)
+
+![](docs/images/demo-openwebui.png)
 
 ## License
 

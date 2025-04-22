@@ -1,4 +1,4 @@
-package lister
+package helper
 
 import (
 	"encoding/json"
@@ -8,6 +8,10 @@ import (
 
 type listResult struct {
 	Workloads []*types.Workload `json:"workloads"`
+}
+
+func (r *listResult) AddWorkload(w *types.Workload) {
+	r.Workloads = append(r.Workloads, w)
 }
 
 func (r *listResult) String() string {

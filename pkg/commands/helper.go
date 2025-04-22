@@ -54,6 +54,6 @@ func (cc *helperCmd) addCommands() {
 	addCommands(
 		cc.cmd,
 		newVersionCmd(),
-		newListCmd(),
+		newRunCmd(),
 	)
 }

@@ -10,8 +10,8 @@ import (
 type Workload struct {
 	Kind            string `json:"kind,omitempty"`
 	metav1.TypeMeta `json:",inline"`
-	Metadata        ObjectMeta `json:"metadata,omitempty"`
-	Status          Status     `json:"status,omitempty"`
+	Metadata        ObjectMeta `json:"metadata"`
+	Status          Status     `json:"status"`
 }
 
 type ObjectMeta struct {
