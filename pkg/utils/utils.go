@@ -8,32 +8,33 @@ import (
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/writer"
-	"golang.org/x/term"
 )
 
 var (
-	Version = "0.1.0"
-	Commit  = "UNKNOWN"
+	Version     = "0.1.0"
+	Commit      = "UNKNOWN"
+	LogFileName = ".helper.log"
 )
 
 func SetupLogrus(hideTime bool) {
+	f, err := os.Create(LogFileName)
+	if err != nil {
+		logrus.Fatalf("failed to create log file %s: %v", LogFileName, err)
+	}
 	formatter := &nested.Formatter{
 		HideKeys:        false,
 		TimestampFormat: "[15:04:05]", // hour, time, sec only
 		FieldsOrder:     []string{"IMG"},
+		NoColors:        true,
 	}
 	if hideTime {
 		formatter.TimestampFormat = "-"
-	}
-	if !term.IsTerminal(int(os.Stdin.Fd())) || !term.IsTerminal(int(os.Stderr.Fd())) {
-		// Disable if the output is not terminal.
-		formatter.NoColors = true
 	}
 	logrus.SetFormatter(formatter)
 	logrus.SetOutput(io.Discard)
 	logrus.AddHook(&writer.Hook{
 		// Send logs with level higher than warning to stderr.
-		Writer: os.Stderr,
+		Writer: f,
 		LogLevels: []logrus.Level{
 			logrus.PanicLevel,
 			logrus.FatalLevel,
@@ -43,7 +44,7 @@ func SetupLogrus(hideTime bool) {
 	})
 	logrus.AddHook(&writer.Hook{
 		// Send info, debug and trace logs to stdout.
-		Writer: os.Stdout,
+		Writer: f,
 		LogLevels: []logrus.Level{
 			logrus.TraceLevel,
 			logrus.InfoLevel,

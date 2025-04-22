@@ -34,8 +34,6 @@ func newListCmd() *listCmd {
 		},
 	})
 
-	// flags := cc.baseCmd.cmd.Flags()
-
 	addCommands(cc.cmd)
 	return cc
 }

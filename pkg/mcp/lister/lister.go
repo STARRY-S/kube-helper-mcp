@@ -34,7 +34,7 @@ func (h *Lister) listDeployment(ns string, opts metav1.ListOptions) (*listResult
 	}
 	result := &listResult{}
 	for _, item := range list.Items {
-		result.Results = append(result.Results, types.NewWorkload(item))
+		result.Workloads = append(result.Workloads, types.NewWorkload(item))
 	}
 	return result, err
 }
@@ -46,7 +46,7 @@ func (h *Lister) listDaemonSet(ns string, opts metav1.ListOptions) (*listResult,
 	}
 	result := &listResult{}
 	for _, item := range list.Items {
-		result.Results = append(result.Results, types.NewWorkload(item))
+		result.Workloads = append(result.Workloads, types.NewWorkload(item))
 	}
 	return result, err
 }
@@ -58,7 +58,7 @@ func (h *Lister) listStatefulSet(ns string, opts metav1.ListOptions) (*listResul
 	}
 	result := &listResult{}
 	for _, item := range list.Items {
-		result.Results = append(result.Results, types.NewWorkload(item))
+		result.Workloads = append(result.Workloads, types.NewWorkload(item))
 	}
 	return result, err
 }
@@ -70,7 +70,7 @@ func (h *Lister) listPod(ns string, opts metav1.ListOptions) (*listResult, error
 	}
 	result := &listResult{}
 	for _, item := range list.Items {
-		result.Results = append(result.Results, types.NewWorkload(item))
+		result.Workloads = append(result.Workloads, types.NewWorkload(item))
 	}
 	return result, err
 }
@@ -102,11 +102,11 @@ func (h *Lister) ListWorkload(
 		return "", fmt.Errorf("unsupported workload type: %s", workload)
 	}
 
-	a, err := listFunc(ns, opts)
+	result, err := listFunc(ns, opts)
 	if err != nil {
 		return "", fmt.Errorf("failed to list %v: %w", workload, err)
 	}
-	return a.String(), nil
+	return result.String(), nil
 }
 
 func (h *Lister) Server() *server.MCPServer {
@@ -122,7 +122,8 @@ func (h *Lister) Server() *server.MCPServer {
 	// Add a calculator tool
 	kubeCheckTool := mcp.NewTool(
 		"list_workload",
-		mcp.WithDescription("List kubernetes cluster workloads with detailed informations"),
+		mcp.WithDescription(`List the real-time kubernetes cluster workloads with status information,
+different workloads and namespaces will produce different results.`),
 		mcp.WithString(
 			"workload",
 			mcp.Required(),
@@ -134,16 +135,16 @@ func (h *Lister) Server() *server.MCPServer {
 			mcp.Description("The kubernetes namespace to query"),
 			mcp.DefaultString("default"),
 		),
-		mcp.WithArray(
-			"labels",
-			mcp.Description("The label of the workload to query"),
-			mcp.DefaultString(""),
-		),
-		mcp.WithNumber(
-			"limit",
-			mcp.Description("The limit of the workload to query"),
-			mcp.DefaultNumber(50),
-		),
+		// mcp.WithArray(
+		// 	"labels",
+		// 	mcp.Description("The label of the workload to query"),
+		// 	mcp.DefaultString(""),
+		// ),
+		// mcp.WithNumber(
+		// 	"limit",
+		// 	mcp.Description("The limit of the workload to query"),
+		// 	mcp.DefaultNumber(50),
+		// ),
 	)
 
 	// Add tool handler

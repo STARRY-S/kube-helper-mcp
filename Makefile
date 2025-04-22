@@ -20,6 +20,10 @@ test:
 serve:
 	KUBE_CONFIG=${HOME}/.kube/config uvx mcpo --config ./mcpo/config.json
 
+.PHONY: image
+image:
+	./scripts/image.sh
+
 .PHONY: clean
 clean:
 	./scripts/clean.sh

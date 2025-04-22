@@ -1,14 +1,16 @@
 package lister
 
 import (
+	"encoding/json"
+
 	"github.com/STARRY-S/kube-helper-mcp/pkg/internal/types"
-	"github.com/STARRY-S/kube-helper-mcp/pkg/utils"
 )
 
 type listResult struct {
-	Results []*types.Workload `json:"results,omitempty"`
+	Workloads []*types.Workload `json:"workloads"`
 }
 
 func (r *listResult) String() string {
-	return utils.Print(r.Results)
+	b, _ := json.Marshal(r)
+	return string(b)
 }
