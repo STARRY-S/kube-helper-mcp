@@ -32,7 +32,9 @@ func init() {
 
 type Interface interface {
 	Endpoints() EndpointsController
+	Event() EventController
 	Namespace() NamespaceController
+	Node() NodeController
 	Pod() PodController
 	Service() ServiceController
 }
@@ -51,8 +53,16 @@ func (v *version) Endpoints() EndpointsController {
 	return generic.NewController[*v1.Endpoints, *v1.EndpointsList](schema.GroupVersionKind{Group: "", Version: "v1", Kind: "Endpoints"}, "endpoints", true, v.controllerFactory)
 }
 
+func (v *version) Event() EventController {
+	return generic.NewController[*v1.Event, *v1.EventList](schema.GroupVersionKind{Group: "", Version: "v1", Kind: "Event"}, "events", true, v.controllerFactory)
+}
+
 func (v *version) Namespace() NamespaceController {
 	return generic.NewNonNamespacedController[*v1.Namespace, *v1.NamespaceList](schema.GroupVersionKind{Group: "", Version: "v1", Kind: "Namespace"}, "namespaces", v.controllerFactory)
+}
+
+func (v *version) Node() NodeController {
+	return generic.NewNonNamespacedController[*v1.Node, *v1.NodeList](schema.GroupVersionKind{Group: "", Version: "v1", Kind: "Node"}, "nodes", v.controllerFactory)
 }
 
 func (v *version) Pod() PodController {

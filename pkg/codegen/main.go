@@ -25,12 +25,14 @@ func main() {
 		Groups: map[string]args.Group{
 			corev1.GroupName: {
 				Types: []any{
+					corev1.Node{},
 					corev1.Pod{},
 					corev1.Service{},
 					corev1.Namespace{},
 					// corev1.Secret{},
 					corev1.Endpoints{},
 					// corev1.ConfigMap{},
+					corev1.Event{},
 				},
 			},
 			appsv1.GroupName: {

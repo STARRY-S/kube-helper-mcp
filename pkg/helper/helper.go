@@ -25,7 +25,7 @@ func NewKubeHelper(c *rest.Config) *KubeHelper {
 func (h *KubeHelper) Server() *server.MCPServer {
 	// Create MCP server
 	s := server.NewMCPServer(
-		"kube_api_call",
+		"kubernetes_helper",
 		strings.TrimPrefix(utils.Version, "v"), // version does not has 'v' prefix
 		server.WithResourceCapabilities(true, true),
 		server.WithLogging(),
@@ -34,14 +34,14 @@ func (h *KubeHelper) Server() *server.MCPServer {
 
 	// Add list_workload tool
 	s.AddTool(mcp.NewTool(
-		"list_workloads",
-		mcp.WithDescription(`List the real-time kubernetes cluster workloads with status information in JSON format,
-different workloads and namespaces will produce different results.`),
+		"list_resources",
+		mcp.WithDescription(`List the kubernetes  with status information in JSON format`),
 		mcp.WithString(
-			"workload",
+			"resource",
 			mcp.Required(),
-			mcp.Description("The kubernetes workload kind to query (pod, deployment, statefulset, daemonset)"),
-			mcp.Enum("pod", "deployment", "statefulset", "daemonset", "job", "cronjob"),
+			mcp.Description("The kubernetes workload kind to query "+
+				"(pod, deployment, statefulset, daemonset, job, cronjob, service, namespace, node)"),
+			mcp.Enum("pod", "deployment", "statefulset", "daemonset", "job", "cronjob", "service", "namespace", "node", "event"),
 			mcp.DefaultString("pod"),
 		),
 		mcp.WithString(
@@ -54,41 +54,31 @@ different workloads and namespaces will produce different results.`),
 			mcp.Description("The limit of the workload to query"),
 			mcp.DefaultNumber(50),
 		),
-	), h.listWorkloadHandler)
-
-	// Add list_namespace tool
-	s.AddTool(mcp.NewTool(
-		"list_namespaces",
-		mcp.WithDescription(`List the real-time kubernetes cluster namespaces JSON format`),
-		mcp.WithNumber(
-			"limit",
-			mcp.Description("The limit of the namespaces to query"),
-			mcp.DefaultNumber(50),
-		),
-	), h.listNamespaceHandler)
+	), h.listResourceHandler)
 
 	// Add get_workload tool
 	s.AddTool(mcp.NewTool(
-		"get_workload",
-		mcp.WithDescription(`Get the real-time kubernetes workload detailed information in JSON format`),
+		"get_single_resource",
+		mcp.WithDescription(`Get one kubernetes resource detailed information in JSON format`),
 		mcp.WithString(
-			"workload",
+			"resource",
 			mcp.Required(),
-			mcp.Description("The kubernetes workload kind to query (pod, deployment, statefulset, daemonset)"),
-			mcp.Enum("pod", "deployment", "statefulset", "daemonset", "job", "cronjob"),
+			mcp.Description("The kubernetes resource kind to query "+
+				"(pod, deployment, statefulset, daemonset, job, cronjob, service, namespace, node, event)"),
+			mcp.Enum("pod", "deployment", "statefulset", "daemonset", "job", "cronjob", "service", "namespace", "node", "event"),
 			mcp.DefaultString("pod"),
 		),
 		mcp.WithString(
 			"namespace",
-			mcp.Description("The kubernetes namespace to query"),
+			mcp.Description("The kubernetes namespace of the resource to query"),
 			mcp.DefaultString(""),
 		),
 		mcp.WithString(
 			"name",
 			mcp.Required(),
-			mcp.Description("The kubernetes workload resource name to get, must be provided"),
+			mcp.Description("The kubernetes resource name to get, must be provided"),
 		),
-	), h.getWorkloadHandler)
+	), h.getResourceHandler)
 
 	return s
 }

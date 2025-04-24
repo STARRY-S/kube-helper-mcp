@@ -18,7 +18,7 @@ func (h *KubeHelper) listDeployment(ns string, opts metav1.ListOptions) (*listRe
 	}
 	result := &listResult{}
 	for _, item := range list.Items {
-		result.Workloads = append(result.Workloads, types.NewWorkload(item))
+		result.Add(types.NewWorkload(item))
 	}
 	return result, err
 }
@@ -30,7 +30,7 @@ func (h *KubeHelper) listDaemonSet(ns string, opts metav1.ListOptions) (*listRes
 	}
 	result := &listResult{}
 	for _, item := range list.Items {
-		result.Workloads = append(result.Workloads, types.NewWorkload(item))
+		result.Add(types.NewWorkload(item))
 	}
 	return result, err
 }
@@ -42,7 +42,7 @@ func (h *KubeHelper) listStatefulSet(ns string, opts metav1.ListOptions) (*listR
 	}
 	result := &listResult{}
 	for _, item := range list.Items {
-		result.Workloads = append(result.Workloads, types.NewWorkload(item))
+		result.Add(types.NewWorkload(item))
 	}
 	return result, err
 }
@@ -54,7 +54,7 @@ func (h *KubeHelper) listJob(ns string, opts metav1.ListOptions) (*listResult, e
 	}
 	result := &listResult{}
 	for _, item := range list.Items {
-		result.Workloads = append(result.Workloads, types.NewWorkload(item))
+		result.Add(types.NewWorkload(item))
 	}
 	return result, err
 }
@@ -66,7 +66,7 @@ func (h *KubeHelper) listCronJob(ns string, opts metav1.ListOptions) (*listResul
 	}
 	result := &listResult{}
 	for _, item := range list.Items {
-		result.Workloads = append(result.Workloads, types.NewWorkload(item))
+		result.Add(types.NewWorkload(item))
 	}
 	return result, err
 }
@@ -78,13 +78,69 @@ func (h *KubeHelper) listPod(ns string, opts metav1.ListOptions) (*listResult, e
 	}
 	result := &listResult{}
 	for _, item := range list.Items {
-		result.Workloads = append(result.Workloads, types.NewWorkload(item))
+		result.Add(types.NewWorkload(item))
 	}
 	return result, err
 }
 
-func (h *KubeHelper) ListWorkload(
-	workload string,
+func (h *KubeHelper) listNamespace(
+	_ string, opts metav1.ListOptions,
+) (*listResult, error) {
+	list, err := h.wctx.Core.Namespace().List(opts)
+	if err != nil {
+		return nil, err
+	}
+	result := &listResult{}
+	for _, list := range list.Items {
+		result.Add(types.NewResource(list))
+	}
+	return result, nil
+}
+
+func (h *KubeHelper) listNode(
+	_ string, opts metav1.ListOptions,
+) (*listResult, error) {
+	list, err := h.wctx.Core.Node().List(opts)
+	if err != nil {
+		return nil, err
+	}
+	result := &listResult{}
+	for _, list := range list.Items {
+		result.Add(types.NewNode(list))
+	}
+	return result, nil
+}
+
+func (h *KubeHelper) listService(
+	ns string, opts metav1.ListOptions,
+) (*listResult, error) {
+	list, err := h.wctx.Core.Service().List(ns, opts)
+	if err != nil {
+		return nil, err
+	}
+	result := &listResult{}
+	for _, list := range list.Items {
+		result.Add(types.NewService(list))
+	}
+	return result, nil
+}
+
+func (h *KubeHelper) listEvent(
+	ns string, opts metav1.ListOptions,
+) (*listResult, error) {
+	list, err := h.wctx.Core.Event().List(ns, opts)
+	if err != nil {
+		return nil, err
+	}
+	result := &listResult{}
+	for _, list := range list.Items {
+		result.Add(types.NewEvent(list))
+	}
+	return result, nil
+}
+
+func (h *KubeHelper) ListResource(
+	resource string,
 	ns string,
 	labels []string,
 	limit int64,
@@ -97,7 +153,7 @@ func (h *KubeHelper) ListWorkload(
 	}
 
 	var listFunc func(string, metav1.ListOptions) (*listResult, error)
-	switch strings.TrimSuffix(strings.ToLower(workload), "s") {
+	switch strings.TrimSuffix(strings.ToLower(resource), "s") {
 	case "deployment":
 		listFunc = h.listDeployment
 	case "daemonset":
@@ -110,8 +166,16 @@ func (h *KubeHelper) ListWorkload(
 		listFunc = h.listCronJob
 	case "pod", "":
 		listFunc = h.listPod
+	case "node":
+		listFunc = h.listNode
+	case "namespace":
+		listFunc = h.listNamespace
+	case "service":
+		listFunc = h.listService
+	case "event":
+		listFunc = h.listEvent
 	default:
-		return "", fmt.Errorf("unsupported workload type: %s", workload)
+		return "", fmt.Errorf("unsupported workload type: %s", resource)
 	}
 
 	ns = strings.ToLower(ns)
@@ -122,37 +186,19 @@ func (h *KubeHelper) ListWorkload(
 
 	result, err := listFunc(ns, opts)
 	if err != nil {
-		return "", fmt.Errorf("failed to list %v: %w", workload, err)
+		return "", fmt.Errorf("failed to list %v: %w", resource, err)
 	}
 	return result.String(), nil
 }
 
-func (h *KubeHelper) ListNamespace(
-	limit int64,
-) (string, error) {
-	opts := metav1.ListOptions{
-		Limit: limit,
-	}
-
-	list, err := h.wctx.Core.Namespace().List(opts)
-	if err != nil {
-		return "", err
-	}
-	result := []string{}
-	for _, list := range list.Items {
-		result = append(result, list.Name)
-	}
-	return strings.Join(result, ","), nil
-}
-
-func (h *KubeHelper) listWorkloadHandler(
+func (h *KubeHelper) listResourceHandler(
 	ctx context.Context,
 	request mcp.CallToolRequest,
 ) (*mcp.CallToolResult, error) {
 	_ = ctx
-	workload, ok := request.Params.Arguments["workload"].(string)
+	name, ok := request.Params.Arguments["resource"].(string)
 	if !ok {
-		return nil, errors.New("workload not provided")
+		return nil, errors.New("resource not provided")
 	}
 	namespace, _ := request.Params.Arguments["namespace"].(string)
 	labels, _ := request.Params.Arguments["labels"].([]any)
@@ -164,20 +210,7 @@ func (h *KubeHelper) listWorkloadHandler(
 			s = append(s, str)
 		}
 	}
-	result, err := h.ListWorkload(workload, namespace, s, int64(limit))
-	if err != nil {
-		return nil, err
-	}
-	return mcp.NewToolResultText(result), nil
-}
-
-func (h *KubeHelper) listNamespaceHandler(
-	ctx context.Context,
-	request mcp.CallToolRequest,
-) (*mcp.CallToolResult, error) {
-	_ = ctx
-	limit, _ := request.Params.Arguments["limit"].(float64)
-	result, err := h.ListNamespace(int64(limit))
+	result, err := h.ListResource(name, namespace, s, int64(limit))
 	if err != nil {
 		return nil, err
 	}

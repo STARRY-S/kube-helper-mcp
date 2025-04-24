@@ -4,22 +4,14 @@ import (
 	"encoding/json"
 
 	"github.com/sirupsen/logrus"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-type Workload struct {
-	Kind            string `json:"kind,omitempty"`
-	metav1.TypeMeta `json:",inline"`
-	Metadata        ObjectMeta `json:"metadata"`
-	Status          Status     `json:"status"`
-}
 
 type ObjectMeta struct {
 	Name      string `json:"name,omitempty"`
 	Namespace string `json:"namespace,omitempty"`
 }
 
-type Status struct {
+type WorkloadStatus struct {
 	Replicas          int32       `json:"replicas,omitempty"`
 	AvailableReplicas int32       `json:"availableReplicas,omitempty"`
 	Conditions        []Condition `json:"conditions,omitempty"`
@@ -30,13 +22,24 @@ type Condition struct {
 	Status string `json:"status"`
 }
 
-func NewWorkload(a any) *Workload {
+type Resource struct {
+	ObjectMeta
+}
+
+func NewResource(a any) *Resource {
 	b, _ := json.Marshal(a)
-	w := &Workload{}
+	w := &Resource{}
 	err := json.Unmarshal(b, w)
 	if err != nil {
 		logrus.Fatal(err)
-		// logrus.Warnf("failed to unmarshal JSON: %v", err)
 	}
 	return w
+}
+
+func (w *Resource) String() string {
+	return w.Name
+}
+
+func (w *Resource) MarshalJSON() ([]byte, error) {
+	return json.Marshal(w)
 }

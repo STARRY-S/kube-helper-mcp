@@ -2,19 +2,27 @@ package helper
 
 import (
 	"encoding/json"
-
-	"github.com/STARRY-S/kube-helper-mcp/pkg/internal/types"
 )
 
+type Result interface {
+	String() string
+}
+
 type listResult struct {
-	Workloads []*types.Workload `json:"workloads"`
+	Results []Result `json:"results"`
 }
 
-func (r *listResult) AddWorkload(w *types.Workload) {
-	r.Workloads = append(r.Workloads, w)
+func (l *listResult) Add(r Result) {
+	l.Results = append(l.Results, r)
 }
 
-func (r *listResult) String() string {
-	b, _ := json.Marshal(r)
+func (l *listResult) String() string {
+	if l == nil {
+		return ""
+	}
+	if len(l.Results) == 0 {
+		return "[]"
+	}
+	b, _ := json.Marshal(l.Results)
 	return string(b)
 }
