@@ -3,7 +3,7 @@ module github.com/STARRY-S/kube-helper-mcp
 go 1.24
 
 require (
-	github.com/antonfisher/nested-logrus-formatter v1.3.1
+	github.com/STARRY-S/simple-logrus-formatter v0.0.0-20250427025245-bdb535b56165
 	github.com/mark3labs/mcp-go v0.20.1
 	github.com/rancher/lasso v0.2.1
 	github.com/rancher/wrangler/v3 v3.2.0

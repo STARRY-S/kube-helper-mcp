@@ -23,7 +23,7 @@ type Condition struct {
 }
 
 type Resource struct {
-	ObjectMeta
+	Metadata ObjectMeta `json:"metadata"`
 }
 
 func NewResource(a any) *Resource {
@@ -37,9 +37,5 @@ func NewResource(a any) *Resource {
 }
 
 func (w *Resource) String() string {
-	return w.Name
-}
-
-func (w *Resource) MarshalJSON() ([]byte, error) {
-	return json.Marshal(w)
+	return w.Metadata.Name
 }

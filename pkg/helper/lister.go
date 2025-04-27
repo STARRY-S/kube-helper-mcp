@@ -8,6 +8,7 @@ import (
 
 	"github.com/STARRY-S/kube-helper-mcp/pkg/internal/types"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -214,5 +215,6 @@ func (h *KubeHelper) listResourceHandler(
 	if err != nil {
 		return nil, err
 	}
+	logrus.Debugf("handle the ListResource Hanlder")
 	return mcp.NewToolResultText(result), nil
 }

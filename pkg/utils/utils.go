@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	nested "github.com/antonfisher/nested-logrus-formatter"
+	"github.com/STARRY-S/simple-logrus-formatter/pkg/formatter"
 	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/writer"
 )
@@ -21,11 +21,8 @@ func SetupLogrus(hideTime bool) {
 	// if err != nil {
 	// 	logrus.Fatalf("failed to create log file %s: %v", LogFileName, err)
 	// }
-	formatter := &nested.Formatter{
-		HideKeys:        false,
-		TimestampFormat: "[15:04:05]", // hour, time, sec only
-		FieldsOrder:     []string{"IMG"},
-		NoColors:        true,
+	formatter := &formatter.Formatter{
+		NoColors: true,
 	}
 	if hideTime {
 		formatter.TimestampFormat = "-"

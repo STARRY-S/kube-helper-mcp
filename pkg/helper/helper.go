@@ -15,8 +15,12 @@ type KubeHelper struct {
 	wctx *wrangler.Context
 }
 
-func NewKubeHelper(c *rest.Config) *KubeHelper {
-	wctx := wrangler.NewContextOrDie(c)
+type Options struct {
+	Cfg *rest.Config
+}
+
+func NewKubeHelper(o *Options) *KubeHelper {
+	wctx := wrangler.NewContextOrDie(o.Cfg)
 	return &KubeHelper{
 		wctx: wctx,
 	}
