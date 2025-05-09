@@ -213,8 +213,8 @@ func (h *KubeHelper) listResourceHandler(
 	}
 	result, err := h.ListResource(name, namespace, s, int64(limit))
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultError(err.Error()), nil
 	}
-	logrus.Debugf("handle the ListResource Hanlder")
+	logrus.Debugf("handle the ListResource Handler")
 	return mcp.NewToolResultText(result), nil
 }

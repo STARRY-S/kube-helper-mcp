@@ -96,6 +96,10 @@ linters:
           - revive
         path: pkg/commands/*
         text: 'unused-parameter: parameter ''args'' seems to be unused'
+      - linters:
+          - gosec
+        path: pkg/k8sgpt/*
+        text: 'G101: Potential hardcoded credentials'
     paths:
       - zz_generated_*
       - third_party$

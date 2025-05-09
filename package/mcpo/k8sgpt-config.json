@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "k8sgpt_helper": {
+      "command": "kube-helper-mcp",
+      "args": [
+          "k8sgpt"
+      ]
+    }
+  }
+}

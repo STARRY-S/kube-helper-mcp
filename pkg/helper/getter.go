@@ -102,8 +102,8 @@ func (h *KubeHelper) getResourceHandler(
 
 	result, err := h.GetResource(workload, name, namespace)
 	if err != nil {
-		return nil, err
+		return mcp.NewToolResultError(err.Error()), nil
 	}
-	logrus.Debugf("handle the getResource Hanlder")
+	logrus.Debugf("handle the getResource Handler")
 	return mcp.NewToolResultText(result), nil
 }

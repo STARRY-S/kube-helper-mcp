@@ -1,9 +1,9 @@
 {
   "mcpServers": {
     "kube_list": {
-      "command": "helper",
+      "command": "./kube-helper-mcp",
       "args": [
-          "list"
+          "run"
       ]
     }
   }

@@ -16,12 +16,14 @@ import (
 
 	appsv1 "github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/apps/v1"
 	batchv1 "github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/batch/v1"
+	k8sgpt "github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/core.k8sgpt.ai"
+	k8sgptv1alpha1 "github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/core.k8sgpt.ai/v1alpha1"
 	discoveryv1 "github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/discovery.k8s.io/v1"
 	networkingv1 "github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/networking.k8s.io/v1"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-const controllerName = "kube-helper-foo-bar"
+const controllerName = "kube-helper-mcp"
 
 type Context struct {
 	RESTConfig        *rest.Config
@@ -33,6 +35,7 @@ type Context struct {
 	Networking networkingv1.Interface
 	Batch      batchv1.Interface
 	Discovery  discoveryv1.Interface
+	K8sGPT     k8sgptv1alpha1.Interface
 }
 
 func NewContextOrDie(
@@ -44,6 +47,7 @@ func NewContextOrDie(
 	networking := networking.NewFactoryFromConfigOrDie(restCfg)
 	batch := batch.NewFactoryFromConfigOrDie(restCfg)
 	discovery := discovery.NewFactoryFromConfigOrDie(restCfg)
+	k8sgpt := k8sgpt.NewFactoryFromConfigOrDie(restCfg)
 
 	controllerFactory, err := controller.NewSharedControllerFactoryFromConfig(restCfg, runtime.NewScheme())
 	if err != nil {
@@ -69,6 +73,7 @@ func NewContextOrDie(
 		Networking: networking.Networking().V1(),
 		Batch:      batch.Batch().V1(),
 		Discovery:  discovery.Discovery().V1(),
+		K8sGPT:     k8sgpt.Core().V1alpha1(),
 	}
 	return c
 }

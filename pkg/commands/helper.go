@@ -55,5 +55,6 @@ func (cc *helperCmd) addCommands() {
 		cc.cmd,
 		newVersionCmd(),
 		newRunCmd(),
+		newK8sGPTCmd(),
 	)
 }

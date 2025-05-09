@@ -1,9 +1,9 @@
 {
   "mcpServers": {
-    "kube_helper": {
+    "k8sgpt_helper": {
       "command": "./kube-helper-mcp",
       "args": [
-          "run"
+          "k8sgpt"
       ]
     }
   }

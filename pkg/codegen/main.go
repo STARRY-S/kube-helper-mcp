@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 
+	k8sgptv1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	controllergen "github.com/rancher/wrangler/v3/pkg/controller-gen"
 	"github.com/rancher/wrangler/v3/pkg/controller-gen/args"
 	"github.com/rancher/wrangler/v3/pkg/crd"
@@ -57,6 +58,13 @@ func main() {
 			networkingv1.GroupName: {
 				Types: []any{
 					networkingv1.Ingress{},
+				},
+			},
+			k8sgptv1alpha1.GroupVersion.Group: {
+				Types: []any{
+					k8sgptv1alpha1.K8sGPT{},
+					k8sgptv1alpha1.Result{},
+					k8sgptv1alpha1.Mutation{},
 				},
 			},
 		},
