@@ -30,7 +30,7 @@ func (h *Helper) RemediateCluster() (string, error) {
 		if !apierrors.IsNotFound(err) {
 			return "", fmt.Errorf("failed to get k8sgpt: %w", err)
 		}
-		return "The K8sGPT self-check action not triggered, use 'check_cluster' to trigger the cluster self-check before remediate.", nil
+		return "The K8sGPT self-check (inspection) action not triggered, use 'check_cluster' to trigger the cluster self-check before remediate.", nil
 	}
 
 	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {

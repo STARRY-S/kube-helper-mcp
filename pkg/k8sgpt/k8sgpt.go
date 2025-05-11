@@ -82,11 +82,12 @@ var (
 	defaultK8sGPTSpec = k8sgptv1alpha1.K8sGPTSpec{
 		AI: &k8sgptv1alpha1.AISpec{
 			AutoRemediation: k8sgptv1alpha1.AutoRemediation{
-				Enabled: false,
+				Enabled:   false,
+				Resources: []string{"Pod", "Deployment"}, // TODO: only check pod, deployments currently
 			},
 			Backend: defaultK8sGPTAIBackend,
 			Enabled: true,
-			Model:   "gpt-4o-mini",
+			Model:   "gpt-4.1-mini",
 			Secret: &k8sgptv1alpha1.SecretRef{
 				Name: defaultK8sGPTSecretName,
 				Key:  defaultK8sGPTSecretKey,

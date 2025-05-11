@@ -39,12 +39,12 @@ func (h *Helper) Server() *server.MCPServer {
 	s.AddTool(mcp.NewTool(
 		"check_cluster",
 		mcp.WithDescription(
-			`Trigger the K8sGPT cluster self-check actions, do not return the status result.`),
+			`Trigger the K8sGPT cluster self-check (inspection) actions, do not return the status result.`),
 	), h.checkClusterHandler)
 
 	s.AddTool(mcp.NewTool(
 		"get_check_results",
-		mcp.WithDescription(`Get all K8sGPT cluster self-check results in JSON format.`),
+		mcp.WithDescription(`Get all K8sGPT cluster self-check (inspection) results in JSON format.`),
 	), h.getCheckResultsHandler)
 
 	s.AddTool(mcp.NewTool(
