@@ -57,11 +57,10 @@ func (cc *k8sGPTCmd) run() error {
 	s := h.Server()
 
 	if cc.sse {
-		addr := fmt.Sprintf("%v:%v", cc.listen, cc.port)
-		u := fmt.Sprintf("http://%v", addr)
+		u := fmt.Sprintf("http://%v:%v", cc.listen, cc.port)
 		sseServer := server.NewSSEServer(h.Server(), server.WithBaseURL(u))
 		logrus.Printf("SSE server listening on %q", u)
-		return sseServer.Start(addr)
+		return sseServer.Start(fmt.Sprintf(":%d", cc.port))
 	}
 	return server.ServeStdio(s)
 }
