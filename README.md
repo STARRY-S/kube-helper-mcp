@@ -18,8 +18,8 @@ go build .
 Use the Kubernetes cluster helper MCP server to list/get the cluster resources.
 
 ```sh
-# Run Kube Helper MCP Server in SSE Mode
-./kube-helper-mcp run --config=${HOME}/.kube/config --sse
+# Run Kube Helper MCP Server in streamable HTTP Mode
+./kube-helper-mcp k8s --config=${HOME}/.kube/config -p http
 
 # Run Kube Helper MCP Server with mcpo to integrate with OpenWebUI
 KUBE_CONFIG=${HOME}/.kube/config uvx mcpo --config ./mcpo/config.json
@@ -55,8 +55,8 @@ K8sGPT helper MCP server provides the abilities to use the [K8sGPT Operator](htt
 1. Start the K8sGPT Helper MCP Server.
 
     ```sh
-    # Run K8sGPT Helper MCP Server in SSE Mode
-    ./kube-helper-mcp k8sgpt --config=${HOME}/.kube/config --sse
+    # Run K8sGPT Helper MCP Server in streamable HTTP Mode
+    ./kube-helper-mcp k8sgpt --config=${HOME}/.kube/config --http
 
     # Run K8sGPT Helper MCP Server with mcpo to integrate with OpenWebUI
     KUBE_CONFIG=${HOME}/.kube/config uvx mcpo --config ./mcpo/k8sgpt-config.json
