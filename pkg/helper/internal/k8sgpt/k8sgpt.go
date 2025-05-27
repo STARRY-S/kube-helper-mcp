@@ -39,13 +39,13 @@ func (h *Helper) checkClusterHandler(
 }
 
 func (h *Helper) CheckCluster() (string, error) {
-	result, err := h.wctx.K8sGPT.K8sGPT().Get(defaultK8sGPTNamespace, defaultK8sGPTName, metav1.GetOptions{})
+	result, err := h.Wctx.K8sGPT.K8sGPT().Get(defaultK8sGPTNamespace, defaultK8sGPTName, metav1.GetOptions{})
 	if err != nil {
 		if !apierrors.IsNotFound(err) {
 			return "", fmt.Errorf("failed to get k8sgpt: %w", err)
 		}
 		k := newK8sGPT()
-		_, err := h.wctx.K8sGPT.K8sGPT().Create(k)
+		_, err := h.Wctx.K8sGPT.K8sGPT().Create(k)
 		if err != nil {
 			return "", fmt.Errorf("failed to create k8sgpt: %w", err)
 		}
@@ -59,14 +59,14 @@ func (h *Helper) CheckCluster() (string, error) {
 	logrus.Infof("Changes detected, updating the K8sGPT resource.")
 
 	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		result, err = h.wctx.K8sGPT.K8sGPT().Get(
+		result, err = h.Wctx.K8sGPT.K8sGPT().Get(
 			defaultK8sGPTNamespace, defaultK8sGPTName, metav1.GetOptions{})
 		if err != nil {
 			return fmt.Errorf("failed to get k8sgpt: %w", err)
 		}
 		result = result.DeepCopy()
 		updateK8sGPT(result)
-		_, err = h.wctx.K8sGPT.K8sGPT().Update(result)
+		_, err = h.Wctx.K8sGPT.K8sGPT().Update(result)
 		if err != nil {
 			return err
 		}

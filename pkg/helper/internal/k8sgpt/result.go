@@ -28,7 +28,7 @@ func (h *Helper) getCheckResultsHandler(
 }
 
 func (h *Helper) GetCheckClusterResults() (string, error) {
-	results, err := h.wctx.K8sGPT.Result().List(defaultK8sGPTNamespace, metav1.ListOptions{
+	results, err := h.Wctx.K8sGPT.Result().List(defaultK8sGPTNamespace, metav1.ListOptions{
 		// LabelSelector: "k8sgpts.k8sgpt.ai/name=" + defaultK8sGPTName,
 	})
 	if err != nil {

@@ -1,88 +1,45 @@
 package helper
 
 import (
-	"strings"
+	"context"
 
+	"github.com/STARRY-S/kube-helper-mcp/pkg/helper/internal/common"
+	"github.com/STARRY-S/kube-helper-mcp/pkg/helper/internal/k8s"
+	"github.com/STARRY-S/kube-helper-mcp/pkg/helper/internal/k8sgpt"
 	"github.com/STARRY-S/kube-helper-mcp/pkg/utils"
-	"github.com/STARRY-S/kube-helper-mcp/pkg/wrangler"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
 	"k8s.io/client-go/rest"
 )
 
-// KubeHelper is a struct that provides methods to make Kubernetes API calls.
-type KubeHelper struct {
-	wctx *wrangler.Context
+type Helper interface {
+	Serve(ctx context.Context) error
+	Shutdown(ctx context.Context) error
 }
 
 type Options struct {
-	Cfg *rest.Config
+	Cfg      *rest.Config
+	Protocol utils.MCPProtocol
+	Listen   string
+	Port     int
 }
 
-func NewKubeHelper(o *Options) *KubeHelper {
-	wctx := wrangler.NewContextOrDie(o.Cfg)
-	return &KubeHelper{
-		wctx: wctx,
-	}
+func NewK8sHelper(o *Options) Helper {
+	return k8s.NewKubeHelper(&k8s.Options{
+		Options: &common.Options{
+			Cfg:      o.Cfg,
+			Protocol: o.Protocol,
+			Listen:   o.Listen,
+			Port:     o.Port,
+		},
+	})
 }
 
-func (h *KubeHelper) Server() *server.MCPServer {
-	// Create MCP server
-	s := server.NewMCPServer(
-		"kubernetes_helper",
-		strings.TrimPrefix(utils.Version, "v"), // version does not has 'v' prefix
-		server.WithResourceCapabilities(true, true),
-		server.WithLogging(),
-		server.WithRecovery(),
-	)
-
-	// Add list_workload tool
-	s.AddTool(mcp.NewTool(
-		"list_resources",
-		mcp.WithDescription(`List the kubernetes  with status information in JSON format`),
-		mcp.WithString(
-			"resource",
-			mcp.Required(),
-			mcp.Description("The kubernetes workload kind to query "+
-				"(pod, deployment, statefulset, daemonset, job, cronjob, service, namespace, node)"),
-			mcp.Enum("pod", "deployment", "statefulset", "daemonset", "job", "cronjob", "service", "namespace", "node", "event"),
-			mcp.DefaultString("pod"),
-		),
-		mcp.WithString(
-			"namespace",
-			mcp.Description("The kubernetes namespace to query"),
-			mcp.DefaultString(""),
-		),
-		mcp.WithNumber(
-			"limit",
-			mcp.Description("The limit of the workload to query"),
-			mcp.DefaultNumber(50),
-		),
-	), h.listResourceHandler)
-
-	// Add get_workload tool
-	s.AddTool(mcp.NewTool(
-		"get_single_resource",
-		mcp.WithDescription(`Get one kubernetes resource detailed information in JSON format`),
-		mcp.WithString(
-			"resource",
-			mcp.Required(),
-			mcp.Description("The kubernetes resource kind to query "+
-				"(pod, deployment, statefulset, daemonset, job, cronjob, service, namespace, node, event)"),
-			mcp.Enum("pod", "deployment", "statefulset", "daemonset", "job", "cronjob", "service", "namespace", "node", "event"),
-			mcp.DefaultString("pod"),
-		),
-		mcp.WithString(
-			"namespace",
-			mcp.Description("The kubernetes namespace of the resource to query"),
-			mcp.DefaultString(""),
-		),
-		mcp.WithString(
-			"name",
-			mcp.Required(),
-			mcp.Description("The kubernetes resource name to get, must be provided"),
-		),
-	), h.getResourceHandler)
-
-	return s
+func NewK8sGPTHelper(o *Options) Helper {
+	return k8sgpt.NewK8sGPTHelper(&k8sgpt.Options{
+		Options: &common.Options{
+			Cfg:      o.Cfg,
+			Protocol: o.Protocol,
+			Listen:   o.Listen,
+			Port:     o.Port,
+		},
+	})
 }

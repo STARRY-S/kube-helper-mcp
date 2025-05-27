@@ -1,4 +1,4 @@
-package helper
+package k8s
 
 import (
 	"context"
@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/STARRY-S/kube-helper-mcp/pkg/internal/types"
+	"github.com/STARRY-S/kube-helper-mcp/pkg/helper/internal/types"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func (h *KubeHelper) listDeployment(ns string, opts metav1.ListOptions) (*listResult, error) {
-	list, err := h.wctx.Apps.Deployment().List(ns, opts)
+	list, err := h.Wctx.Apps.Deployment().List(ns, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +25,7 @@ func (h *KubeHelper) listDeployment(ns string, opts metav1.ListOptions) (*listRe
 }
 
 func (h *KubeHelper) listDaemonSet(ns string, opts metav1.ListOptions) (*listResult, error) {
-	list, err := h.wctx.Apps.DaemonSet().List(ns, opts)
+	list, err := h.Wctx.Apps.DaemonSet().List(ns, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (h *KubeHelper) listDaemonSet(ns string, opts metav1.ListOptions) (*listRes
 }
 
 func (h *KubeHelper) listStatefulSet(ns string, opts metav1.ListOptions) (*listResult, error) {
-	list, err := h.wctx.Apps.StatefulSet().List(ns, opts)
+	list, err := h.Wctx.Apps.StatefulSet().List(ns, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (h *KubeHelper) listStatefulSet(ns string, opts metav1.ListOptions) (*listR
 }
 
 func (h *KubeHelper) listJob(ns string, opts metav1.ListOptions) (*listResult, error) {
-	list, err := h.wctx.Batch.Job().List(ns, opts)
+	list, err := h.Wctx.Batch.Job().List(ns, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func (h *KubeHelper) listJob(ns string, opts metav1.ListOptions) (*listResult, e
 }
 
 func (h *KubeHelper) listCronJob(ns string, opts metav1.ListOptions) (*listResult, error) {
-	list, err := h.wctx.Batch.CronJob().List(ns, opts)
+	list, err := h.Wctx.Batch.CronJob().List(ns, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (h *KubeHelper) listCronJob(ns string, opts metav1.ListOptions) (*listResul
 }
 
 func (h *KubeHelper) listPod(ns string, opts metav1.ListOptions) (*listResult, error) {
-	list, err := h.wctx.Core.Pod().List(ns, opts)
+	list, err := h.Wctx.Core.Pod().List(ns, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (h *KubeHelper) listPod(ns string, opts metav1.ListOptions) (*listResult, e
 func (h *KubeHelper) listNamespace(
 	_ string, opts metav1.ListOptions,
 ) (*listResult, error) {
-	list, err := h.wctx.Core.Namespace().List(opts)
+	list, err := h.Wctx.Core.Namespace().List(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (h *KubeHelper) listNamespace(
 func (h *KubeHelper) listNode(
 	_ string, opts metav1.ListOptions,
 ) (*listResult, error) {
-	list, err := h.wctx.Core.Node().List(opts)
+	list, err := h.Wctx.Core.Node().List(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (h *KubeHelper) listNode(
 func (h *KubeHelper) listService(
 	ns string, opts metav1.ListOptions,
 ) (*listResult, error) {
-	list, err := h.wctx.Core.Service().List(ns, opts)
+	list, err := h.Wctx.Core.Service().List(ns, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +129,7 @@ func (h *KubeHelper) listService(
 func (h *KubeHelper) listEvent(
 	ns string, opts metav1.ListOptions,
 ) (*listResult, error) {
-	list, err := h.wctx.Core.Event().List(ns, opts)
+	list, err := h.Wctx.Core.Event().List(ns, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -197,13 +197,17 @@ func (h *KubeHelper) listResourceHandler(
 	request mcp.CallToolRequest,
 ) (*mcp.CallToolResult, error) {
 	_ = ctx
-	name, ok := request.Params.Arguments["resource"].(string)
+	arguments := request.GetArguments()
+	if arguments == nil {
+		return nil, fmt.Errorf("failed to get request arguments")
+	}
+	name, ok := arguments["resource"].(string)
 	if !ok {
 		return nil, errors.New("resource not provided")
 	}
-	namespace, _ := request.Params.Arguments["namespace"].(string)
-	labels, _ := request.Params.Arguments["labels"].([]any)
-	limit, _ := request.Params.Arguments["limit"].(float64)
+	namespace, _ := arguments["namespace"].(string)
+	labels, _ := arguments["labels"].([]any)
+	limit, _ := arguments["limit"].(float64)
 
 	s := make([]string, 0, len(labels))
 	for _, label := range labels {

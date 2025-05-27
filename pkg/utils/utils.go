@@ -16,13 +16,17 @@ var (
 	LogFileName = ".helper.log"
 )
 
+type MCPProtocol string
+
+const (
+	ProtocolStdio MCPProtocol = "stdio"
+	ProtocolSSE   MCPProtocol = "sse"
+	ProtocolHTTP  MCPProtocol = "http"
+)
+
 func SetupLogrus(hideTime bool) {
-	// f, err := os.Create(LogFileName)
-	// if err != nil {
-	// 	logrus.Fatalf("failed to create log file %s: %v", LogFileName, err)
-	// }
 	formatter := &formatter.Formatter{
-		NoColors: true,
+		NoColors: false,
 	}
 	if hideTime {
 		formatter.TimestampFormat = "-"

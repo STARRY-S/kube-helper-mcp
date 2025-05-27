@@ -1,4 +1,4 @@
-package helper
+package k8s
 
 import (
 	"encoding/json"

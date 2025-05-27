@@ -1,27 +1,26 @@
 package k8sgpt
 
 import (
+	"context"
 	"strings"
 
+	"github.com/STARRY-S/kube-helper-mcp/pkg/helper/internal/common"
 	"github.com/STARRY-S/kube-helper-mcp/pkg/utils"
-	"github.com/STARRY-S/kube-helper-mcp/pkg/wrangler"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"k8s.io/client-go/rest"
 )
 
 type Helper struct {
-	wctx *wrangler.Context
+	*common.Common
 }
 
 type Options struct {
-	Cfg *rest.Config
+	*common.Options
 }
 
 func NewK8sGPTHelper(o *Options) *Helper {
-	wctx := wrangler.NewContextOrDie(o.Cfg)
 	return &Helper{
-		wctx: wctx,
+		Common: common.NewCommon(o.Options),
 	}
 }
 
@@ -58,4 +57,12 @@ func (h *Helper) Server() *server.MCPServer {
 	), h.getRemediateResultHandler)
 
 	return s
+}
+
+func (h *Helper) Serve(ctx context.Context) error {
+	return h.Common.Start(ctx, h.Server())
+}
+
+func (h *Helper) Shutdown(ctx context.Context) error {
+	return h.Common.Stop(ctx)
 }

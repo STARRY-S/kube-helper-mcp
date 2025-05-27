@@ -24,7 +24,7 @@ func (h *Helper) remediateClusterHandler(
 }
 
 func (h *Helper) RemediateCluster() (string, error) {
-	result, err := h.wctx.K8sGPT.K8sGPT().Get(
+	result, err := h.Wctx.K8sGPT.K8sGPT().Get(
 		defaultK8sGPTNamespace, defaultK8sGPTName, metav1.GetOptions{})
 	if err != nil {
 		if !apierrors.IsNotFound(err) {
@@ -34,14 +34,14 @@ func (h *Helper) RemediateCluster() (string, error) {
 	}
 
 	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		result, err = h.wctx.K8sGPT.K8sGPT().Get(
+		result, err = h.Wctx.K8sGPT.K8sGPT().Get(
 			defaultK8sGPTNamespace, defaultK8sGPTName, metav1.GetOptions{})
 		if err != nil {
 			return fmt.Errorf("failed to get k8sgpt: %w", err)
 		}
 		result = result.DeepCopy()
 		result.Spec.AI.AutoRemediation.Enabled = true
-		_, err = h.wctx.K8sGPT.K8sGPT().Update(result)
+		_, err = h.Wctx.K8sGPT.K8sGPT().Update(result)
 		if err != nil {
 			return err
 		}

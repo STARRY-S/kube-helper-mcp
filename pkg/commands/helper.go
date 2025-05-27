@@ -38,9 +38,9 @@ func newHelperCmd() *helperCmd {
 	cc.cmd.SilenceErrors = true
 
 	flags := cc.cmd.PersistentFlags()
-	flags.StringVarP(&cc.baseCmd.kubeConfig, "kubeconfig", "c", "", "kube-config file (optional)")
-	flags.BoolVarP(&cc.baseCmd.debug, "debug", "", false, "enable debug output")
-	flags.BoolVar(&cc.baseCmd.hideLogTime, "hide-log-time", false, "hide log output timestamp")
+	flags.StringVarP(&cc.baseCmd.kubeConfig, "kubeconfig", "c", "", "Kube config file (optional)")
+	flags.BoolVarP(&cc.baseCmd.debug, "debug", "", false, "Enable debug output")
+	flags.BoolVar(&cc.baseCmd.hideLogTime, "hide-log-time", false, "Hide log output timestamp")
 	flags.MarkHidden("hide-log-time")
 
 	return cc
@@ -54,7 +54,7 @@ func (cc *helperCmd) addCommands() {
 	addCommands(
 		cc.cmd,
 		newVersionCmd(),
-		newRunCmd(),
+		newK8sCmd(),
 		newK8sGPTCmd(),
 	)
 }

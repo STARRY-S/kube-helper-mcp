@@ -9,7 +9,6 @@ import (
 	"github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/networking.k8s.io"
 	"github.com/rancher/lasso/pkg/controller"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/record"
@@ -22,8 +21,6 @@ import (
 	networkingv1 "github.com/STARRY-S/kube-helper-mcp/pkg/generated/controllers/networking.k8s.io/v1"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
-
-const controllerName = "kube-helper-mcp"
 
 type Context struct {
 	RESTConfig        *rest.Config
@@ -49,11 +46,6 @@ func NewContextOrDie(
 	discovery := discovery.NewFactoryFromConfigOrDie(restCfg)
 	k8sgpt := k8sgpt.NewFactoryFromConfigOrDie(restCfg)
 
-	controllerFactory, err := controller.NewSharedControllerFactoryFromConfig(restCfg, runtime.NewScheme())
-	if err != nil {
-		logrus.Fatalf("failed to build shared controller factory: %v", err)
-	}
-
 	k8s, err := kubernetes.NewForConfig(restCfg)
 	if err != nil {
 		logrus.Fatalf("kubernetes.NewForConfig: %v", err)
@@ -64,9 +56,8 @@ func NewContextOrDie(
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: k8s.CoreV1().Events("")})
 
 	c := &Context{
-		RESTConfig:        restCfg,
-		Kubernetes:        k8s,
-		ControllerFactory: controllerFactory,
+		RESTConfig: restCfg,
+		Kubernetes: k8s,
 
 		Core:       core.Core().V1(),
 		Apps:       apps.Apps().V1(),

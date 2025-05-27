@@ -1,15 +1,12 @@
 package commands
 
 import (
-	"context"
-	"time"
-
 	"github.com/STARRY-S/kube-helper-mcp/pkg/signal"
 	"github.com/spf13/cobra"
 )
 
 var (
-	signalContext context.Context = signal.SetupSignalContext()
+	signalContext = signal.SetupSignalContext()
 )
 
 type baseCmd struct {
@@ -31,17 +28,6 @@ var globalOpts = baseOpts{}
 
 func (cc *baseCmd) getCommand() *cobra.Command {
 	return cc.cmd
-}
-
-func (cc *baseCmd) ctxWithTimeout(timeout time.Duration) (context.Context, context.CancelFunc) {
-	var (
-		ctx                       = signalContext
-		cancel context.CancelFunc = func() {}
-	)
-	if timeout > 0 {
-		ctx, cancel = context.WithTimeout(ctx, timeout)
-	}
-	return ctx, cancel
 }
 
 type cmder interface {

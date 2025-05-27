@@ -30,7 +30,7 @@ func (h *Helper) getRemediateResultHandler(
 }
 
 func (h *Helper) GetMutationResult() (string, error) {
-	results, err := h.wctx.K8sGPT.Mutation().List(defaultK8sGPTNamespace, metav1.ListOptions{})
+	results, err := h.Wctx.K8sGPT.Mutation().List(defaultK8sGPTNamespace, metav1.ListOptions{})
 	if err != nil {
 		return "", err
 	}

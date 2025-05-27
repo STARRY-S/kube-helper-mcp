@@ -1,4 +1,4 @@
-package helper
+package k8s
 
 import (
 	"context"
@@ -13,32 +13,32 @@ import (
 )
 
 func (h *KubeHelper) getDeployment(ns string, n string, opts metav1.GetOptions) (metav1.Object, error) {
-	return h.wctx.Apps.Deployment().Get(ns, n, opts)
+	return h.Wctx.Apps.Deployment().Get(ns, n, opts)
 }
 
 func (h *KubeHelper) getDaemonSet(ns string, n string, opts metav1.GetOptions) (metav1.Object, error) {
-	return h.wctx.Apps.DaemonSet().Get(ns, n, opts)
+	return h.Wctx.Apps.DaemonSet().Get(ns, n, opts)
 }
 func (h *KubeHelper) getStatefulSet(ns string, n string, opts metav1.GetOptions) (metav1.Object, error) {
-	return h.wctx.Apps.StatefulSet().Get(ns, n, opts)
+	return h.Wctx.Apps.StatefulSet().Get(ns, n, opts)
 }
 func (h *KubeHelper) getPod(ns string, n string, opts metav1.GetOptions) (metav1.Object, error) {
-	return h.wctx.Core.Pod().Get(ns, n, opts)
+	return h.Wctx.Core.Pod().Get(ns, n, opts)
 }
 func (h *KubeHelper) getJob(ns string, n string, opts metav1.GetOptions) (metav1.Object, error) {
-	return h.wctx.Batch.Job().Get(ns, n, opts)
+	return h.Wctx.Batch.Job().Get(ns, n, opts)
 }
 func (h *KubeHelper) getCronJob(ns string, n string, opts metav1.GetOptions) (metav1.Object, error) {
-	return h.wctx.Batch.CronJob().Get(ns, n, opts)
+	return h.Wctx.Batch.CronJob().Get(ns, n, opts)
 }
 func (h *KubeHelper) getNamespace(ns string, _ string, opts metav1.GetOptions) (metav1.Object, error) {
-	return h.wctx.Core.Namespace().Get(ns, opts)
+	return h.Wctx.Core.Namespace().Get(ns, opts)
 }
 func (h *KubeHelper) getNode(_ string, n string, opts metav1.GetOptions) (metav1.Object, error) {
-	return h.wctx.Core.Node().Get(n, opts)
+	return h.Wctx.Core.Node().Get(n, opts)
 }
 func (h *KubeHelper) getService(ns string, n string, opts metav1.GetOptions) (metav1.Object, error) {
-	return h.wctx.Core.Service().Get(ns, n, opts)
+	return h.Wctx.Core.Service().Get(ns, n, opts)
 }
 
 func (h *KubeHelper) GetResource(
@@ -90,15 +90,19 @@ func (h *KubeHelper) getResourceHandler(
 	request mcp.CallToolRequest,
 ) (*mcp.CallToolResult, error) {
 	_ = ctx
-	workload, ok := request.Params.Arguments["resource"].(string)
+	arguments := request.GetArguments()
+	if arguments == nil {
+		return nil, fmt.Errorf("failed to get request arguments")
+	}
+	workload, ok := arguments["resource"].(string)
 	if !ok {
 		return nil, errors.New("resource not provided")
 	}
-	name, ok := request.Params.Arguments["name"].(string)
+	name, ok := arguments["name"].(string)
 	if !ok {
 		return nil, errors.New("resource name not provided, use list_resources to list resources")
 	}
-	namespace, _ := request.Params.Arguments["namespace"].(string)
+	namespace, _ := arguments["namespace"].(string)
 
 	result, err := h.GetResource(workload, name, namespace)
 	if err != nil {

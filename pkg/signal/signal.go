@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"github.com/sirupsen/logrus"
@@ -14,6 +15,8 @@ var (
 	onlyOneSignalHandler = make(chan struct{})
 	shutdownHandler      chan os.Signal
 	shutdownSignals      = []os.Signal{os.Interrupt, syscall.SIGTERM}
+	shutdownCallbacks    = make([]func() error, 0)
+	wg                   = sync.WaitGroup{}
 )
 
 // SetupSignalContext is same as SetupSignalHandler, but a context.Context is returned.
@@ -28,8 +31,21 @@ func SetupSignalContext() context.Context {
 	signal.Notify(shutdownHandler, shutdownSignals...)
 	go func() {
 		<-shutdownHandler
+		wg.Add(1)
 		cancel()
 		fmt.Println()
+		logrus.Infof("Stopping MCP server")
+		if len(shutdownCallbacks) != 0 {
+			for _, cb := range shutdownCallbacks {
+				if cb == nil {
+					continue
+				}
+				if err := cb(); err != nil {
+					logrus.Error(err)
+				}
+			}
+		}
+		wg.Done()
 		<-shutdownHandler
 
 		// second signal. Exit directly.
@@ -38,4 +54,12 @@ func SetupSignalContext() context.Context {
 	}()
 
 	return ctx
+}
+
+func RegisterOnShutdown(cb func() error) {
+	shutdownCallbacks = append(shutdownCallbacks, cb)
+}
+
+func Flush() {
+	wg.Wait()
 }
