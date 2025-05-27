@@ -21,7 +21,7 @@ const (
 	defaultK8sGPTNamespace  = "k8sgpt-operator-system"
 	defaultK8sGPTRepository = "ghcr.io/k8sgpt-ai/k8sgpt"
 	defaultK8sGPTVersion    = "latest"
-	defaultK8sGPTSecretName = "k8sgpt-openai-api-key"
+	defaultK8sGPTSecretName = "k8sgpt-openai-api-key" // #nosec G101
 	defaultK8sGPTSecretKey  = "api-key"
 )
 
