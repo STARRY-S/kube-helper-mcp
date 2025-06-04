@@ -33,6 +33,7 @@ func (h *Helper) Server(ctx context.Context) (*server.MCPServer, error) {
 		server.WithResourceCapabilities(true, true),
 		server.WithLogging(),
 		server.WithRecovery(),
+		server.WithInstructions("Trigger/Get the cluster self-check & remediate results, need to convert the result in table formats."),
 	)
 
 	// s.AddPrompt() // TODO: Add Prompts
@@ -48,22 +49,22 @@ func (h *Helper) Server(ctx context.Context) (*server.MCPServer, error) {
 	s.AddTool(mcp.NewTool(
 		"check_cluster",
 		mcp.WithDescription(
-			`Trigger the K8sGPT cluster self-check actions, and return self-check results.`),
+			`Trigger the K8sGPT cluster self-check actions, and return self-check results, need to convert the result in table format for better reading.`),
 	), h.checkClusterHandler)
 
 	s.AddTool(mcp.NewTool(
 		"get_check_results",
-		mcp.WithDescription(`Get all K8sGPT cluster self-check (inspection) results in JSON format.`),
+		mcp.WithDescription(`Get all K8sGPT cluster self-check (inspection) results in JSON format, need to convert the result in table format for better reading.`),
 	), h.getCheckResultsHandler)
 
 	s.AddTool(mcp.NewTool(
 		"remediate_cluster",
-		mcp.WithDescription(`Use K8sGPT to remediate the cluster, and return mutation results.`),
+		mcp.WithDescription(`Use K8sGPT to remediate the cluster, and return mutation results, need to convert the result in table format for better reading.`),
 	), h.remediateClusterHandler)
 
 	s.AddTool(mcp.NewTool(
 		"get_mutation_result",
-		mcp.WithDescription(`Get the K8sGPT remediate mutation result in JSON format.`),
+		mcp.WithDescription(`Get the K8sGPT remediate mutation result in JSON format, need to convert the result in table format for better reading..`),
 	), h.getRemediateResultHandler)
 
 	return s, nil
