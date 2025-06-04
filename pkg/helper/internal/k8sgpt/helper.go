@@ -2,6 +2,7 @@ package k8sgpt
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/STARRY-S/kube-helper-mcp/pkg/helper/internal/common"
@@ -24,7 +25,7 @@ func NewK8sGPTHelper(o *Options) *Helper {
 	}
 }
 
-func (h *Helper) Server() *server.MCPServer {
+func (h *Helper) Server(ctx context.Context) (*server.MCPServer, error) {
 	// Create MCP server
 	s := server.NewMCPServer(
 		"k8sgpt_helper",
@@ -34,11 +35,20 @@ func (h *Helper) Server() *server.MCPServer {
 		server.WithRecovery(),
 	)
 
+	// s.AddPrompt() // TODO: Add Prompts
+	// s.AddResources() // TODO: Add Resources
+
+	// Add session
+	session := common.NewSession("k8sgpt-session-1")
+	if err := s.RegisterSession(ctx, session); err != nil {
+		return nil, fmt.Errorf("failed to register session for server: %w", err)
+	}
+
 	// Add list_workload tool
 	s.AddTool(mcp.NewTool(
 		"check_cluster",
 		mcp.WithDescription(
-			`Trigger the K8sGPT cluster self-check (inspection) actions, do not return the status result.`),
+			`Trigger the K8sGPT cluster self-check actions, and return self-check results.`),
 	), h.checkClusterHandler)
 
 	s.AddTool(mcp.NewTool(
@@ -56,11 +66,15 @@ func (h *Helper) Server() *server.MCPServer {
 		mcp.WithDescription(`Get the K8sGPT remediate mutation result in JSON format.`),
 	), h.getRemediateResultHandler)
 
-	return s
+	return s, nil
 }
 
 func (h *Helper) Serve(ctx context.Context) error {
-	return h.Common.Start(ctx, h.Server())
+	server, err := h.Server(ctx)
+	if err != nil {
+		return err
+	}
+	return h.Common.Start(ctx, server)
 }
 
 func (h *Helper) Shutdown(ctx context.Context) error {

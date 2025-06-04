@@ -3,7 +3,7 @@
     "kube_list": {
       "command": "./kube-helper-mcp",
       "args": [
-          "run"
+          "k8s"
       ]
     }
   }

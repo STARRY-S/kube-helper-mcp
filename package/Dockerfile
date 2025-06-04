@@ -24,5 +24,5 @@ RUN pip install --no-cache-dir mcpo
 COPY --from=build /app/kube-helper-mcp /usr/local/bin/
 COPY --from=build /app/package/mcpo/ /mcpo/
 
-# Run SSE server in default mode
-CMD [ "kube-helper-mcp", "run", "--sse" ]
+# Run Streamable HTTP Server in default mode
+CMD [ "kube-helper-mcp", "run", "--http" ]

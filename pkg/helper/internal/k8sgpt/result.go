@@ -35,7 +35,7 @@ func (h *Helper) GetCheckClusterResults() (string, error) {
 		return "", err
 	}
 	if results == nil || len(results.Items) == 0 {
-		return "no results found, please ensure the check_cluster action executed and wait a few minutes to get the result.", nil
+		return "No abnormality has been found in the cluster yet.", nil
 	}
 
 	res := make([]clusterResult, 0, len(results.Items))

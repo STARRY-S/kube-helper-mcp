@@ -94,6 +94,10 @@ linters:
         text: 'unused-parameter: parameter ''cmd'' seems to be unused'
       - linters:
           - revive
+        path: pkg/helper/internal/*
+        text: 'seems to be unused, consider removing'
+      - linters:
+          - revive
         path: pkg/commands/*
         text: 'unused-parameter: parameter ''args'' seems to be unused'
       - linters:

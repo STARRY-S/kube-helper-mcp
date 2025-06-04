@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/util/retry"
 
@@ -29,52 +30,89 @@ func (h *Helper) checkClusterHandler(
 	ctx context.Context,
 	request mcp.CallToolRequest,
 ) (*mcp.CallToolResult, error) {
-	_ = ctx
-	_ = request
-	result, err := h.CheckCluster()
+	defer logrus.Infof("Done checkClusterHandler")
+	logrus.Infof("checkClusterHandler")
+
+	var progressToken mcp.ProgressToken
+	if request.Params.Meta != nil {
+		progressToken = request.Params.Meta.ProgressToken
+	}
+
+	// Get the current session from context
+	session := server.ClientSessionFromContext(ctx)
+	server := server.ServerFromContext(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("No active session"), nil
+	}
+	if server == nil {
+		return mcp.NewToolResultError("Failed to get server"), nil
+	}
+	logrus.Infof("Trigger checkClusterHandler %v", session.SessionID())
+
+	err := h.TriggerClusterCheck()
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
+	logrus.Infof("Done trigger clustercheck %v", session.SessionID())
+
+	if progressToken != nil {
+		if err := server.SendNotificationToClient(
+			ctx,
+			"notifications/message",
+			map[string]any{
+				"message": "Successfully triggered K8sGPT ClusterCheck actions",
+			},
+		); err != nil {
+			return mcp.NewToolResultError(fmt.Errorf("failed to send notification: %w", err).Error()), nil
+		}
+		// TODO: checking cluster check results...
+	}
+
+	result, err := h.GetCheckClusterResults()
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
 	return mcp.NewToolResultText(result), nil
 }
 
-func (h *Helper) CheckCluster() (string, error) {
+func (h *Helper) TriggerClusterCheck() error {
+	// Create or update k8sgpt check resource.
 	result, err := h.Wctx.K8sGPT.K8sGPT().Get(defaultK8sGPTNamespace, defaultK8sGPTName, metav1.GetOptions{})
 	if err != nil {
 		if !apierrors.IsNotFound(err) {
-			return "", fmt.Errorf("failed to get k8sgpt: %w", err)
+			return fmt.Errorf("failed to get k8sgpt: %w", err)
 		}
 		k := newK8sGPT()
 		_, err := h.Wctx.K8sGPT.K8sGPT().Create(k)
 		if err != nil {
-			return "", fmt.Errorf("failed to create k8sgpt: %w", err)
+			return fmt.Errorf("failed to create k8sgpt: %w", err)
 		}
-		return "Successfully created the K8sGPT resource, please check the results in a few minutes.", nil
+	} else {
+		logrus.Infof("K8sGPT [%s/%s] already exists.", result.Namespace, result.Name)
+		if needUpdateK8sGPT(result) {
+			logrus.Infof("Changes detected, updating the K8sGPT resource.")
+			if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+				result, err = h.Wctx.K8sGPT.K8sGPT().Get(
+					defaultK8sGPTNamespace, defaultK8sGPTName, metav1.GetOptions{})
+				if err != nil {
+					return fmt.Errorf("failed to get k8sgpt: %w", err)
+				}
+				result = result.DeepCopy()
+				updateK8sGPT(result)
+				_, err = h.Wctx.K8sGPT.K8sGPT().Update(result)
+				if err != nil {
+					return err
+				}
+				return nil
+			}); err != nil {
+				return fmt.Errorf("failed to update k8sgpt: %w", err)
+			}
+		}
 	}
 
-	logrus.Infof("K8sGPT [%s/%s] already exists.", result.Namespace, result.Name)
-	if !needUpdateK8sGPT(result) {
-		return "Done, the K8sGPT resource already exists, please check the results in a few minutes.", nil
-	}
-	logrus.Infof("Changes detected, updating the K8sGPT resource.")
-
-	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		result, err = h.Wctx.K8sGPT.K8sGPT().Get(
-			defaultK8sGPTNamespace, defaultK8sGPTName, metav1.GetOptions{})
-		if err != nil {
-			return fmt.Errorf("failed to get k8sgpt: %w", err)
-		}
-		result = result.DeepCopy()
-		updateK8sGPT(result)
-		_, err = h.Wctx.K8sGPT.K8sGPT().Update(result)
-		if err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		return "", fmt.Errorf("failed to update k8sgpt: %w", err)
-	}
-	return "Successfully updated the k8sgpt resource, please check the new results in a few minutes.", nil
+	// Waiting for k8sgpt resources
+	return nil
 }
 
 var (
