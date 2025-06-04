@@ -8,6 +8,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	noCheckResultFound = `The inspection action has been successfully triggered and no abnormal workload has been found yet.
+The cluster currently has no abnormalities detected,
+which indicates that the cluster is healthy.
+If necessary, check the cluster health status again after a few minutes.`
+)
+
 type clusterResult struct {
 	Name    string `json:"name"`
 	Details string `json:"details"`
@@ -35,7 +42,7 @@ func (h *Helper) GetCheckClusterResults() (string, error) {
 		return "", err
 	}
 	if results == nil || len(results.Items) == 0 {
-		return "No abnormality has been found in the cluster yet.", nil
+		return noCheckResultFound, nil
 	}
 
 	res := make([]clusterResult, 0, len(results.Items))

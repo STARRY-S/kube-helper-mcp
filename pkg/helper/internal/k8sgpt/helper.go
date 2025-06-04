@@ -58,7 +58,7 @@ func (h *Helper) Server(ctx context.Context) (*server.MCPServer, error) {
 
 	s.AddTool(mcp.NewTool(
 		"remediate_cluster",
-		mcp.WithDescription(`Use K8sGPT to remediate the cluster, only triggers the actions, do not return the remediate mutation result.`),
+		mcp.WithDescription(`Use K8sGPT to remediate the cluster, and return mutation results.`),
 	), h.remediateClusterHandler)
 
 	s.AddTool(mcp.NewTool(

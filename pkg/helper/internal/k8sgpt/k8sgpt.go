@@ -30,9 +30,6 @@ func (h *Helper) checkClusterHandler(
 	ctx context.Context,
 	request mcp.CallToolRequest,
 ) (*mcp.CallToolResult, error) {
-	defer logrus.Infof("Done checkClusterHandler")
-	logrus.Infof("checkClusterHandler")
-
 	var progressToken mcp.ProgressToken
 	if request.Params.Meta != nil {
 		progressToken = request.Params.Meta.ProgressToken
@@ -47,13 +44,13 @@ func (h *Helper) checkClusterHandler(
 	if server == nil {
 		return mcp.NewToolResultError("Failed to get server"), nil
 	}
-	logrus.Infof("Trigger checkClusterHandler %v", session.SessionID())
+	logrus.Debugf("Trigger checkClusterHandler %v", session.SessionID())
 
 	err := h.TriggerClusterCheck()
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
-	logrus.Infof("Done trigger clustercheck %v", session.SessionID())
+	logrus.Debugf("Done trigger clustercheck %v", session.SessionID())
 
 	if progressToken != nil {
 		if err := server.SendNotificationToClient(
@@ -65,7 +62,7 @@ func (h *Helper) checkClusterHandler(
 		); err != nil {
 			return mcp.NewToolResultError(fmt.Errorf("failed to send notification: %w", err).Error()), nil
 		}
-		// TODO: checking cluster check results...
+		// TODO: check and wait for cluster check results...
 	}
 
 	result, err := h.GetCheckClusterResults()
@@ -153,6 +150,7 @@ func newK8sGPT() *k8sgptv1alpha1.K8sGPT {
 }
 
 func needUpdateK8sGPT(result *k8sgptv1alpha1.K8sGPT) bool {
+	// TODO:
 	return !reflect.DeepEqual(result.Spec, defaultK8sGPTSpec)
 }
 

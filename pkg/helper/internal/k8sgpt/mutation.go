@@ -11,6 +11,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	noRemediateResultFound = `The remediate action has been successfully triggered and no mutation result yet,
+which indicates that the cluster is already healthy or is currently remediating resources.
+If necessary, check the cluster mutation results again after a few minutes.`
+)
+
 type mutationResult struct {
 	ResourceRef corev1.ObjectReference        `json:"resource,omitempty"`
 	Status      k8sgptv1alpha1.MutationStatus `json:"status"`
@@ -35,7 +41,7 @@ func (h *Helper) GetMutationResult() (string, error) {
 		return "", err
 	}
 	if results == nil || len(results.Items) == 0 {
-		return "no results found, please ensure the remediate_cluster action executed and wait a few minutes to get the result.", nil
+		return noRemediateResultFound, nil
 	}
 
 	res := make([]mutationResult, 0, len(results.Items))

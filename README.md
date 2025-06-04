@@ -1,5 +1,14 @@
 # Kubernetes Resource Check MCP Server
 
+<div align="">
+  <p>
+    <a href="https://goreportcard.com/report/github.com/STARRY-S/kube-helper-mcp"><img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/STARRY-S/kube-helper-mcp"></a>
+    <a href="https://github.com/STARRY-S/kube-helper-mcp/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/STARRY-S/kube-helper-mcp?color=default&label=release&logo=github"></a>
+    <a href="https://github.com/STARRY-S/kube-helper-mcp/releases"><img alt="GitHub pre-release" src="https://img.shields.io/github/v/release/STARRY-S/kube-helper-mcp?include_prereleases&label=pre-release&logo=github"></a>
+    <img alt="License" src="https://img.shields.io/badge/License-Apache_2.0-blue.svg">
+  </p>
+</div>
+
 MCP Server for checking Kubernetes Resources.
 
 > This project is currently in development status and not available to use in production.
@@ -72,6 +81,14 @@ Demo:
 ![](docs/images/k8sgpt-mutation-result.png)
 
 </details>
+
+### Run in container image
+
+Container image is available in the [GitHub Package](https://github.com/STARRY-S/kube-helper-mcp/pkgs/container/kube-helper-mcp).
+
+```console
+$ podman pull ghcr.io/starry-s/kube-helper-mcp:${TAG}
+```
 
 ## License
 
