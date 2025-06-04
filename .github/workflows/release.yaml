@@ -4,53 +4,43 @@ on:
   push:
     tags: [ 'v*' ]
 
+permissions:
+  contents: write
+  packages: write
+
 env:
   REGISTRY: "ghcr.io"
   REPOSITORY: "library"
+  HANGAR_VERSION: "v1.9.2"
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  image-release:
+  github-release:
     runs-on: 'ubuntu-latest'
-    permissions:
-      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Prepare env
-        run: |-
-          REPOSITORY=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')
-          echo "REPOSITORY=$REPOSITORY" >> $GITHUB_ENV
-      - name: Install Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: 1.24.x
-          cache: false
-      - name: Login to ghcr.io
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ env.REPOSITORY }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          driver-opts: |
-            network=host
-      - name: Image Build and push
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          build-args: |
-            TAG=${{ github.ref_name }}
-            COMMIT=${{ github.sha }}
-          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/kube-helper-mcp:${{ github.ref_name }}
-          platforms: "linux/amd64,linux/arm64"
-          file: package/Dockerfile
-          sbom: true
-          provenance: mode=max
       - name: GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: ./.github/actions/github-release
+  image-build-amd64:
+    runs-on: 'ubuntu-24.04'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build Image
+        uses: ./.github/actions/image-build
+  image-build-arm64:
+    runs-on: 'ubuntu-24.04-arm'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build Image
+        uses: ./.github/actions/image-build
+  image-manifest:
+    needs: [ image-build-amd64, image-build-arm64 ]
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Image Manifest
+        uses: ./.github/actions/image-manifest

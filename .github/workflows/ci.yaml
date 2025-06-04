@@ -54,7 +54,7 @@ jobs:
             TAG=${{ github.ref_name }}
             COMMIT=${{ github.sha }}
           tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/kube-helper-mcp:dev
-          platforms: "linux/amd64,linux/arm64"
+          platforms: "linux/amd64"
           file: package/Dockerfile
           sbom: true
           provenance: mode=max
