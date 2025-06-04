@@ -1,44 +1,37 @@
-name: CI
+name: Release
 
 on:
   pull_request:
   push:
-    branches: [ '**' ]
-    tags-ignore: [ '**' ] # Disable Tag
+    tags: [ 'v*' ]
 
 env:
-  REGISTRY: "localhost:5000"
+  REGISTRY: "ghcr.io"
   REPOSITORY: "library"
 
 jobs:
-  ci:
+  image-release:
     runs-on: 'ubuntu-latest'
+    permissions:
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Prepare env
+        run: |-
+          REPOSITORY=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')
+          echo "REPOSITORY=$REPOSITORY" >> $GITHUB_ENV
       - name: Install Go
         uses: actions/setup-go@v5
         with:
           go-version: 1.24.x
-      - name: Lint
-        uses: golangci/golangci-lint-action@v8
-      - name: Test
-        run: |
-          make test
-  image-build:
-    runs-on: 'ubuntu-latest'
-    services:
-      registry:
-        image: registry.suse.com/suse/registry:2.8
-        ports:
-          - 5000:5000
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Install Go
-        uses: actions/setup-go@v5
+          cache: false
+      - name: Login to ${{ env.REGISTRY }}
+        uses: docker/login-action@v3
         with:
-          go-version: 1.24.x
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.REPOSITORY }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
       - name: Setup Docker Buildx
@@ -46,15 +39,17 @@ jobs:
         with:
           driver-opts: |
             network=host
-      - name: Image Build
+      - name: Image Build and push
         uses: docker/build-push-action@v6
         with:
           push: true
           build-args: |
             TAG=${{ github.ref_name }}
             COMMIT=${{ github.sha }}
-          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/kube-helper-mcp:dev
+          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/kube-helper-mcp:${{ github.ref_name }}
           platforms: "linux/amd64,linux/arm64"
           file: package/Dockerfile
           sbom: true
           provenance: mode=max
+      - name: GitHub Release
+        uses: ./.github/actions/github-release
