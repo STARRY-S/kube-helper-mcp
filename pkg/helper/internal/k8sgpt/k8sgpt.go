@@ -21,7 +21,7 @@ const (
 	defaultK8sGPTName       = "k8sgpt-cluster-check"
 	defaultK8sGPTNamespace  = "k8sgpt-operator-system"
 	defaultK8sGPTRepository = "ghcr.io/k8sgpt-ai/k8sgpt"
-	defaultK8sGPTVersion    = "latest"
+	defaultK8sGPTVersion    = "v0.4.17"               // TODO: edit here if needed
 	defaultK8sGPTSecretName = "k8sgpt-openai-api-key" // #nosec G101
 	defaultK8sGPTSecretKey  = "api-key"
 )
@@ -115,6 +115,8 @@ func (h *Helper) TriggerClusterCheck() error {
 var (
 	// TODO: Make these values configurable
 	defaultK8sGPTSpec = k8sgptv1alpha1.K8sGPTSpec{
+		Version:    defaultK8sGPTVersion,
+		Repository: defaultK8sGPTRepository,
 		AI: &k8sgptv1alpha1.AISpec{
 			AutoRemediation: k8sgptv1alpha1.AutoRemediation{
 				Enabled:   false,
@@ -129,10 +131,8 @@ var (
 			},
 			ProxyEndpoint: os.Getenv("HTTPS_PROXY"),
 		},
-		NoCache:    false,
-		Filters:    []string{"Pod", "Deployment"}, // TODO: only check pod, deployments currently
-		Repository: defaultK8sGPTRepository,
-		Version:    defaultK8sGPTVersion,
+		NoCache: false,
+		Filters: []string{"Pod", "Deployment"}, // TODO: only check pod, deployments currently
 	}
 )
 

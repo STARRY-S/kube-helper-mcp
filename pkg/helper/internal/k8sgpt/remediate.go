@@ -30,7 +30,7 @@ func (h *Helper) remediateClusterHandler(
 	if server == nil {
 		return mcp.NewToolResultError("Failed to get server"), nil
 	}
-	logrus.Debugf("Trigger remediateClusterHandler %v", session.SessionID())
+	logrus.Infof("Trigger remediateClusterHandler %v", session.SessionID())
 
 	err := h.RemediateCluster()
 	if err != nil {
