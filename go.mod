@@ -5,7 +5,7 @@ go 1.24.0
 require (
 	github.com/STARRY-S/simple-logrus-formatter v0.0.0-20250427025245-bdb535b56165
 	github.com/k8sgpt-ai/k8sgpt-operator v0.2.20
-	github.com/mark3labs/mcp-go v0.31.0
+	github.com/mark3labs/mcp-go v0.32.0
 	github.com/rancher/lasso v0.2.2
 	github.com/rancher/wrangler/v3 v3.2.1
 	github.com/sirupsen/logrus v1.9.3
